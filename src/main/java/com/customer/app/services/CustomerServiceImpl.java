@@ -36,7 +36,7 @@ public class CustomerServiceImpl implements CustomerService{
         Map<String, Object> response = new HashMap<>();
         return dao.findByDni(costomer.getDni()).collectList().flatMap( c -> {
             if(c.isEmpty()){
-
+                costomer.setType("Personal");
                 return dao.save(costomer).flatMap(cx ->{
                     response.put("Usuario", cx);
                     response.put("Message", "Usuario registrado con éxito");
