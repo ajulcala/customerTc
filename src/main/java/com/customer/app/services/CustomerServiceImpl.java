@@ -2,6 +2,7 @@ package com.customer.app.services;
 
 import com.customer.app.models.dao.CustomerDao;
 import com.customer.app.models.documents.Customer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
+@Slf4j
 @Service
 public class CustomerServiceImpl implements CustomerService{
     @Autowired
@@ -38,11 +40,13 @@ public class CustomerServiceImpl implements CustomerService{
             if(c.isEmpty()){
                 costomer.setType("Personal");
                 return dao.save(costomer).flatMap(cx ->{
+                    log.info("usuario agregado");
                     response.put("Usuario", cx);
                     response.put("Message", "Usuario registrado con éxito");
                     return Mono.just(new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK));
                 });
             }else{
+                log.info("ya esxiste un usuario agregado con el mismo dni");
                 response.put("Message", "Existe un usuario con el mismo DNI");
                 response.put("Note", "Verifique sus Datos");
                 return Mono.just(new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST));
@@ -63,6 +67,7 @@ public class CustomerServiceImpl implements CustomerService{
             c.setType(customer.getType());
             return dao.save(c);
         }).map(customerUpdated->{
+            log.info("usuario modificado");
             response.put("Mensaje:", "Cliente actualizado");
             response.put("Customer:", customerUpdated);
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
@@ -72,6 +77,7 @@ public class CustomerServiceImpl implements CustomerService{
     @Override
     public Mono<ResponseEntity<Void>> deleteCustomer(String id) {
         return dao.findById(id).flatMap(p ->{
+            log.info("usuario eliminado");
             return dao.delete(p).then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)));
         }).defaultIfEmpty(new ResponseEntity<Void>(HttpStatus.NOT_FOUND));
     }
